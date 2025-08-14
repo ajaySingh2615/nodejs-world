@@ -1,12 +1,10 @@
-// Modules
-
-// 1. Build in modules
-// 2. Third party modules (External Modules) - npm install
-// 3. Custom (my own modules)
-
-// File system module
-import fs from "fs";
-console.log(fs);
+import fs from "node:fs";
 
 const content = fs.readFileSync("notes.txt", "utf-8");
 console.log(content);
+
+// fs.writeFileSync("copy.txt", "This is my new file", "utf-8");
+fs.appendFileSync("copy.txt", "This is my new file2", "utf-8");
+
+fs.mkdirSync("games/xyz/a", { recursive: true });
+fs.rmdirSync("games/xyz");
