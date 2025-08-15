@@ -27,17 +27,23 @@ const books = [
   { id: 3, title: "To Kill a Mockingbird", author: "Harper Lee" },
 ];
 
+function loggerMiddleware(req, res, next) {
+  const log = `[${Date.now()}] ${req.method} ${req.path}`;
+  fs.appendFileSync("logs.txt", log + "\n", "utf-8");
+  next();
+}
+
+function customMiddleware(req, res, next) {
+  console.log("I am custom middleware");
+  next();
+}
+
 // ============================================================================
 // MIDDLEWARE CONFIGURATION
 // ============================================================================
 // Parse incoming JSON payloads in request body
 app.use(express.json());
-
-app.use(function (req, res, next) {
-  const log = `[${Date.now()}] ${req.method} ${req.path}`;
-  fs.appendFileSync("logs.txt", log + "\n", "utf-8");
-  next();
-});
+app.use(loggerMiddleware);
 
 // ============================================================================
 // ROUTE DEFINITIONS
@@ -63,7 +69,7 @@ app.get("/books", (req, res) => {
  * @returns {Object} Book object if found
  * @returns {Object} Error message if ID is invalid or book not found
  */
-app.get("/books/:id", (req, res) => {
+app.get("/books/:id", customMiddleware, loggerMiddleware, (req, res) => {
   const id = parseInt(req.params.id);
 
   // Validate that the ID parameter is a valid number
