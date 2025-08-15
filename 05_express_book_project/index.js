@@ -12,6 +12,7 @@
  */
 
 import express from "express";
+import fs from "node:fs";
 
 // Initialize Express application
 const app = express();
@@ -31,6 +32,12 @@ const books = [
 // ============================================================================
 // Parse incoming JSON payloads in request body
 app.use(express.json());
+
+app.use(function (req, res, next) {
+  const log = `[${Date.now()}] ${req.method} ${req.path}`;
+  fs.appendFileSync("logs.txt", log + "\n", "utf-8");
+  next();
+});
 
 // ============================================================================
 // ROUTE DEFINITIONS
