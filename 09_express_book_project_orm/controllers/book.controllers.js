@@ -1,4 +1,5 @@
 import { booksTable } from "../models/book.models.js";
+import { authorsTable } from "../models/author.models.js";
 import db from "../db/index.js";
 import { eq, sql } from "drizzle-orm";
 
@@ -25,6 +26,7 @@ async function getBookById(req, res) {
     .select()
     .from(booksTable)
     .where((table) => eq(table.id, id))
+    .leftJoin(authorsTable, eq(booksTable.authorId, authorsTable.id))
     .limit(1);
 
   // Return 404 if book is not found
