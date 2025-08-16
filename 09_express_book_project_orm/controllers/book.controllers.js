@@ -1,6 +1,6 @@
 import { booksTable } from "../models/book.models.js";
 import db from "../db/index.js";
-import { eq, ilike } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 async function getAllBooks(req, res) {
   const search = req.query.search;
@@ -8,7 +8,9 @@ async function getAllBooks(req, res) {
     const books = await db
       .select()
       .from(booksTable)
-      .where(ilike(booksTable.title, `%${search}%`));
+      .where(
+        sql`to_tsvector('english', ${booksTable.title}) @@ to_tsquery('english', ${search})`
+      );
     return res.json(books);
   }
   const books = await db.select().from(booksTable);
