@@ -1,4 +1,5 @@
 import { authorsTable } from "../models/author.models.js";
+import { booksTable } from "../models/book.models.js";
 import db from "../db/index.js";
 import { eq } from "drizzle-orm";
 
@@ -40,4 +41,18 @@ async function deleteAuthor(req, res) {
   return res.json({ message: `Author with id ${id} deleted successfully` });
 }
 
-export { getAllAuthors, getAuthorById, createAuthor, deleteAuthor };
+async function getAuthorBooks(req, res) {
+  const books = await db
+    .select()
+    .from(booksTable)
+    .where(eq(booksTable.authorId, req.params.id));
+  return res.json(books);
+}
+
+export {
+  getAllAuthors,
+  getAuthorById,
+  createAuthor,
+  deleteAuthor,
+  getAuthorBooks,
+};
