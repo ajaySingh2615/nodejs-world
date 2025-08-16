@@ -2,6 +2,7 @@ import dotenv from "dotenv/config";
 import express from "express";
 import { loggerMiddleware } from "./middlewares/logger.js";
 import bookRoutes from "./routes/book.routes.js";
+import authorRoutes from "./routes/author.routes.js";
 
 const app = express();
 const port = 8000;
@@ -10,6 +11,7 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 app.use("/books", bookRoutes);
+app.use("/authors", authorRoutes);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
