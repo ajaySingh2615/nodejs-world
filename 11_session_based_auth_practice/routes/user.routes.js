@@ -7,28 +7,27 @@ import { createHash, randomBytes } from "crypto";
 
 const router = express.Router();
 
+router.patch("/", async (req, res) => {
+  const user = req.user;
+
+  if (!user) {
+    return res.status(401).json({ error: "you are not logged in" });
+  }
+
+  const { name } = req.body;
+
+  await db.update(usersTable).set({ name }).where(eq(usersTable.id, user.id));
+
+  return res.status(200).json({ status: "success" });
+});
+
 router.get("/", async (req, res) => {
-  const sessionId = req.headers["session-id"];
-  if (!sessionId) {
+  const user = req.user;
+
+  if (!user) {
     return res.status(401).json({ error: "you are not logged in" });
   }
-
-  const [data] = await db
-    .select({
-      id: userSessions.id,
-      userId: userSessions.userId,
-      name: usersTable.name,
-      email: usersTable.email,
-    })
-    .from(userSessions)
-    .rightJoin(usersTable, eq(usersTable.id, userSessions.userId))
-    .where((table) => eq(table.id, sessionId));
-
-  if (!data) {
-    return res.status(401).json({ error: "you are not logged in" });
-  }
-
-  return res.status(200).json({ data });
+  return res.status(200).json({ user });
 }); // returns current logged in user
 
 router.post("/signup", async (req, res) => {
