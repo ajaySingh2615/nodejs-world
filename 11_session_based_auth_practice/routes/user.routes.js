@@ -1,6 +1,6 @@
 import express from "express";
 import db from "../db/index.js";
-import { usersTable } from "../db/schema.js";
+import { userSessions, usersTable } from "../db/schema.js";
 import { error, table } from "console";
 import { eq } from "drizzle-orm";
 import { createHash, randomBytes } from "crypto";
@@ -40,6 +40,7 @@ router.post("/login", async (req, res) => {
 
   const [existingUser] = await db
     .select({
+      id: usersTable.id,
       email: usersTable.email,
       salt: usersTable.salt,
       password: usersTable.password,
@@ -63,7 +64,14 @@ router.post("/login", async (req, res) => {
   }
 
   // create a session
-  return res.status(200).json({ status: "success" });
+  const [session] = await db
+    .insert(userSessions)
+    .values({
+      userId: existingUser.id,
+    })
+    .returning({ id: userSessions.id });
+
+  return res.status(200).json({ status: "success", sessionId: session.id });
 });
 router.post("/logout");
 
