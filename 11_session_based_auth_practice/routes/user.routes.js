@@ -1,9 +1,10 @@
+import "dotenv/config";
 import express from "express";
 import db from "../db/index.js";
-import { userSessions, usersTable } from "../db/schema.js";
-import { error, table } from "console";
+import { usersTable } from "../db/schema.js";
 import { eq } from "drizzle-orm";
 import { createHash, randomBytes } from "crypto";
+import jwt from "jsonwebtoken";
 
 const router = express.Router();
 
@@ -85,15 +86,16 @@ router.post("/login", async (req, res) => {
     return res.status(400).json({ error: "Invalid password" });
   }
 
-  // create a session
-  const [session] = await db
-    .insert(userSessions)
-    .values({
-      userId: existingUser.id,
-    })
-    .returning({ id: userSessions.id });
+  const payload = {
+    id: existingUser.id,
+    email: existingUser.email,
+    name: existingUser.name,
+  };
 
-  return res.status(200).json({ status: "success", sessionId: session.id });
+  const token = jwt.sign(payload, process.env.JWT_SECRET);
+  console.log(process.env.JWT_SECRET);
+
+  return res.status(200).json({ status: "success", token });
 });
 router.post("/logout");
 
