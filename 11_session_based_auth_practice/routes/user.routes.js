@@ -34,7 +34,37 @@ router.post("/signup", async (req, res) => {
 
   return res.status(201).json({ userId: user.id });
 });
-router.post("/login");
+
+router.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  const [existingUser] = await db
+    .select({
+      email: usersTable.email,
+      salt: usersTable.salt,
+      password: usersTable.password,
+    })
+    .from(usersTable)
+    .where((table) => eq(table.email, email));
+
+  if (!existingUser) {
+    return res
+      .status(404)
+      .json({ error: `user with email ${email} not found` });
+  }
+
+  const salt = existingUser.salt;
+  const existingHashedPassword = existingUser.password;
+
+  const newHash = createHash("sha256", salt).update(password).digest("hex");
+
+  if (newHash !== existingHashedPassword) {
+    return res.status(400).json({ error: "Invalid password" });
+  }
+
+  // create a session
+  return res.status(200).json({ status: "success" });
+});
 router.post("/logout");
 
 export default router;
