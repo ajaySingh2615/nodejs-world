@@ -1,4 +1,41 @@
 import Mailgen from "mailgen";
+import nodemailer from "nodemailer";
+
+const sendEmail = async (options) => {
+  const mailGenerator = new Mailgen({
+    theme: "default",
+    product: {
+      name: "Project Management System",
+      link: "https://mailgen.js/",
+    },
+  });
+
+  const emailTextual = mailGenerator.generatePlaintext(options.mailGenContent);
+  const emailHTML = mailGenerator.generate(options.mailGenContent);
+
+  const transporter = nodemailer.createTransport({
+    host: process.env.MAILTRAP_SMTP_HOST,
+    port: process.env.MAILTRAP_SMTP_PORT,
+    auth: {
+      user: process.env.MAILTRAP_SMTP_USER,
+      pass: process.env.MAILTRAP_SMTP_PASS,
+    },
+  });
+
+  const mail = {
+    from: "mail.taskmanager@example.com",
+    to: options.email,
+    subject: options.subject,
+    text: emailTextual,
+    html: emailHTML,
+  };
+
+  try {
+    await transporter.sendMail(mail);
+  } catch (error) {
+    console.error("Email service failed to send email", error);
+  }
+};
 
 const emailVerificationTemplate = (username, verificationLink) => {
   return {
@@ -38,4 +75,4 @@ const forgotPasswordTemplate = (username, resetPasswordLink) => {
   };
 };
 
-export { emailVerificationTemplate, forgotPasswordTemplate };
+export { emailVerificationTemplate, forgotPasswordTemplate, sendEmail };
