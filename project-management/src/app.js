@@ -20,7 +20,9 @@ app.use(
 
 // import the routes
 import healthcheckRoutes from "./routes/healthcheck.routes.js";
+import authRoutes from "./routes/auth.routes.js";
 
 app.use("/api/v1/healthcheck", healthcheckRoutes);
+app.use("/api/v1/auth", authRoutes);
 
 export default app;
