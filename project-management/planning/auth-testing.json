@@ -1,0 +1,212 @@
+{
+  "info": {
+    "name": "Project Management Auth API",
+    "_postman_id": "f7c3c0d6-2bb2-4a91-ae0f-9a8b2c9f0abc",
+    "description": "Auth & user flows: register, login, logout, me, email verification, token refresh, password flows.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "email", "value": "alice@example.com" },
+    { "key": "username", "value": "alice" },
+    { "key": "password", "value": "Password@123" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "resetToken", "value": "PASTE_RESET_TOKEN_FROM_EMAIL" },
+    {
+      "key": "verificationToken",
+      "value": "PASTE_VERIFICATION_TOKEN_FROM_EMAIL"
+    }
+  ],
+  "item": [
+    {
+      "name": "Healthcheck",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/healthcheck",
+        "header": []
+      }
+    },
+    {
+      "name": "Register",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 201\", function () {",
+              "  pm.response.to.have.status(201);",
+              "});",
+              "const body = pm.response.json();",
+              "pm.test(\"User returned\", function () {",
+              "  pm.expect(body?.data?.user?._id).to.exist;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"fullName\": \"Alice Example\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/register"
+      }
+    },
+    {
+      "name": "Login (with email)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "const access = body?.data?.accessToken;",
+              "const refresh = body?.data?.refreshToken;",
+              "if (access) pm.environment.set('accessToken', access);",
+              "if (refresh) pm.environment.set('refreshToken', refresh);",
+              "pm.test(\"Tokens captured\", function () {",
+              "  pm.expect(pm.environment.get('accessToken')).to.exist;",
+              "  pm.expect(pm.environment.get('refreshToken')).to.exist;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login"
+      }
+    },
+    {
+      "name": "Login (with username)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/login"
+      }
+    },
+    {
+      "name": "Me (protected)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/me"
+      }
+    },
+    {
+      "name": "Resend Email Verification (protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/resend-verification"
+      }
+    },
+    {
+      "name": "Verify Email (via token in URL)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/v1/auth/verify-email/{{verificationToken}}"
+      }
+    },
+    {
+      "name": "Refresh Token (body or cookie)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Status code is 200\", function () {",
+              "  pm.response.to.have.status(200);",
+              "});",
+              "const body = pm.response.json();",
+              "const access = body?.data?.accessToken;",
+              "const refresh = body?.data?.refreshToken;",
+              "if (access) pm.environment.set('accessToken', access);",
+              "if (refresh) pm.environment.set('refreshToken', refresh);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/refresh-token"
+      }
+    },
+    {
+      "name": "Forgot Password (request email)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{email}}\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/forgot-password"
+      }
+    },
+    {
+      "name": "Reset Password (via token in URL)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"newPassword\": \"NewPassword@123\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/reset-password/{{resetToken}}"
+      }
+    },
+    {
+      "name": "Change Password (protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"oldPassword\": \"{{password}}\",\n  \"newPassword\": \"NewPassword@123\"\n}"
+        },
+        "url": "{{baseUrl}}/api/v1/auth/change-password"
+      }
+    },
+    {
+      "name": "Logout (protected)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/logout"
+      }
+    }
+  ]
+}
