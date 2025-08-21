@@ -69,23 +69,29 @@ const registerUser = asyncHandler(async (req, res) => {
   );
 });
 
+// controller
 const loginUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!username || !email) {
+  // After validators, this is defensive, but still good to keep:
+  if (!username && !email) {
     throw new ApiError(400, "Username or email is required");
   }
+  if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
 
-  const user = await User.findOne({
-    $or: [{ username }, { email }],
-  });
+  // Build $or from whichever identifier(s) came in
+  const orConditions = [];
+  if (email) orConditions.push({ email });
+  if (username) orConditions.push({ username });
 
+  const user = await User.findOne({ $or: orConditions });
   if (!user) {
     throw new ApiError(404, "User not found");
   }
 
   const isPasswordCorrect = await user.isPasswordCorrect(password);
-
   if (!isPasswordCorrect) {
     throw new ApiError(401, "Invalid credentials");
   }
@@ -100,7 +106,9 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
+    secure: true, // set true in prod over HTTPS
+    sameSite: "lax", // consider "strict" for CSRF-hardening if your UX allows
+    // maxAge: 1000 * 60 * 60 * 24 * 7, // optional
   };
 
   return res
