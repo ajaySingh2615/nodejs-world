@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -13,12 +13,38 @@ export default function SignupPage() {
     password: "",
     username: "",
   });
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+
   const [loading, setLoading] = React.useState(false);
   const [showPwd, setShowPwd] = React.useState(false);
 
   const onSignup = async () => {
     // your signup logic here (kept empty per your note)
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/users/signup", user);
+      console.log("Signup successful", response.data);
+      toast.success("Signup successful");
+      router.push("/login");
+    } catch (error: any) {
+      console.log("Signup failed", error.message);
+      toast.error("Signup failed", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (
+      user.email.length > 0 &&
+      user.password.length > 0 &&
+      user.username.length > 0
+    ) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-neutral-950 dark:to-neutral-900 flex items-center justify-center px-4 py-12">
@@ -125,7 +151,7 @@ export default function SignupPage() {
                 {loading && (
                   <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
                 )}
-                Sign up
+                {buttonDisabled ? "Fill the form" : "Sign up"}
               </button>
 
               {/* Footer */}
