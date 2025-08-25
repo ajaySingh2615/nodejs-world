@@ -59,7 +59,7 @@ function App() {
 
 function Header() {
   return (
-    <header className="header footer">
+    <header className="header">
       <h1>Fast React Pizza Co.</h1>
     </header>
   );
@@ -73,11 +73,18 @@ function Menu() {
       <h2>Our Menu</h2>
 
       {numPizzas > 0 ? (
-        <ul className="pizzas">
-          {pizzas.map((pizza) => (
-            <Pizza pizzaObj={pizza} key={pizza.name} />
-          ))}
-        </ul>
+        <React.Fragment>
+          <p>
+            Authentic Italian cuisine, freshly baked and topped with the finest
+            ingredients. Choose from our delicious selection of pizzas, each
+            crafted to satisfy your cravings!
+          </p>
+          <ul className="pizzas">
+            {pizzas.map((pizza) => (
+              <Pizza pizzaObj={pizza} key={pizza.name} />
+            ))}
+          </ul>
+        </React.Fragment>
       ) : (
         <p>We're still working on our menu. Please come back later :)</p>
       )}
