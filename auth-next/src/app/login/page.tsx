@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import toast from "react-hot-toast";
@@ -12,12 +12,33 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [showPwd, setShowPwd] = React.useState(false);
 
   const onLogin = async () => {
     // your login logic here (kept empty per your note)
+    try {
+      setLoading(true);
+      const response = await axios.post("/api/users/login", user);
+      console.log(response);
+      toast.success("Login successful");
+      router.push("/profile");
+    } catch (error: any) {
+      toast.error(error.response.data.error);
+    } finally {
+      setLoading(false);
+    }
   };
+  console.log(user);
+
+  useEffect(() => {
+    if (user.email.length > 0 && user.password.length > 0) {
+      setButtonDisabled(false);
+    } else {
+      setButtonDisabled(true);
+    }
+  }, [user]);
 
   return (
     <div className="min-h-screen w-full bg-gradient-to-br from-slate-50 to-slate-100 dark:from-neutral-950 dark:to-neutral-900 flex items-center justify-center px-4 py-12">
@@ -96,7 +117,7 @@ export default function LoginPage() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
+                disabled={loading || buttonDisabled}
                 onClick={onLogin}
                 className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 active:bg-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-offset-neutral-900 disabled:opacity-60 disabled:cursor-not-allowed transition"
               >
