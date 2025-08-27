@@ -1,13 +1,9 @@
-import Search from "./Search";
 import Logo from "./Logo";
-import NumResults from "./NumResults";
 
-export default function Navbar({ movies }) {
+export default function Navbar({ children }) {
   return (
     <nav className="nav-bar">
-      <Logo />
-      <NumResults movies={movies} />
-      <Search />
+      <Logo /> {children}
     </nav>
   );
 }
