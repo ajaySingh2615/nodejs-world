@@ -37,12 +37,7 @@ export default function WatchedBox() {
       >
         {isOpen2 ? "–" : "+"}
       </button>
-      {isOpen2 && (
-        <>
-          <WatchedSummary watched={watched} />
-          <WatchedMovieList watched={watched} />
-        </>
-      )}
+      {isOpen2 && <></>}
     </div>
   );
 }

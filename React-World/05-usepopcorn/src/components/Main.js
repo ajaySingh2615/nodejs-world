@@ -1,4 +1,4 @@
-import ListBox from "./ListBox";
+import ListBox from "./Box";
 import WatchedBox from "./WatchedBox";
 
 export default function Main({ children }) {
