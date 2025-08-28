@@ -13,7 +13,7 @@ import ErrorMessage from "./components/ErrorMessage";
 const KEY = "b06a7801";
 
 export default function App() {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState("inception");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -44,6 +44,13 @@ export default function App() {
           setIsLoading(false);
         }
       }
+
+      if (query.length < 3) {
+        setMovies([]);
+        setError("");
+        return;
+      }
+
       fetchMovies();
     },
     [query]
